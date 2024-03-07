@@ -4,6 +4,7 @@ from .models import Task
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task
+from django.views.decorators.http import require_POST
 
 
 # Create your views here.
@@ -25,6 +26,37 @@ def create_task(request):
     task.save()
     return redirect('/task/')
  
+
+def editarTask(request, task_id):
+    # Obtener la tarea por su ID
+    task = get_object_or_404(Task, id=task_id)
+    
+    # Actualizar los datos de la tarea con los datos recibidos del formulario
+    carnet = request.POST.get('carnet')
+    nombres = request.POST.get('nombres')
+    apellidos = request.POST.get('apellidos')
+    correoelectronico = request.POST.get('correo')
+    fechaNacimiento = request.POST.get('fecha')
+    
+    # Verificar si los campos no son null antes de asignarlos a la instancia de Task
+    if carnet is not None:
+        task.carnet = carnet
+    if nombres is not None:
+        task.nombres = nombres
+    if apellidos is not None:
+        task.apellidos = apellidos
+    if correoelectronico is not None:
+        task.correoelectronico = correoelectronico
+    if fechaNacimiento is not None:
+        task.fechaNacimiento = fechaNacimiento
+    
+    # Guardar los cambios en la base de datos
+    task.save()
+    
+    # Redirigir a alguna página de confirmación o a la misma página de edición
+    return redirect('editarTask', task_id=task_id)
+
+
 
 
 def delete_task(request, task_id):

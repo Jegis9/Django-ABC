@@ -1,0 +1,48 @@
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Editar Alumno</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editar-form" action="/task/editar_task/" method="post">
+
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="modal-carnet">Carnet:</label>
+                        <!-- Cambiamos el input a un campo oculto para el carné -->
+                        <input type="hidden" name="carnet" id="modal-carnet">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-nombres">Nombres:</label>
+                        <input type="text" class="form-control" id="modal-nombres" name="nombres" maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-apellidos">Apellidos:</label>
+                        <input type="text" class="form-control" id="modal-apellidos" name="apellidos" maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-correoelectronico">Correo Electrónico:</label>
+                        <input type="email" class="form-control" id="modal-correoelectronico" name="correoelectronico">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-fechaNacimiento">Fecha de Nacimiento:</label>
+                        <input type="date" class="form-control" id="modal-fechaNacimiento" name="fechaNacimiento">
+                    </div>
+
+                    <button type="submit" id="guardar-cambios-btn" class="btn btn-primary">Guardar Cambios</button>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

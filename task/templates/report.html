@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <style>
     #myChart {
-        width: 20cm;
-        height: 20cm;
+        width: 10cm; /* Ancho reducido */
+        height: 10cm; /* Altura reducida */
+    }
+    .container{
+        width: 25%;
+        height: 25%;
     }
 </style>
 
@@ -22,19 +27,34 @@
                     <p> <span id="adult_count"></span></p>
                     <p><span id="minor_count"></span></p>
                 </div>
+                <button onclick="generarPDF()" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Descargar PDF</button>
             </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
     <script>
+        function generarPDF() {
+            var canvas = document.getElementById('myChart');
+            var imgData = canvas.toDataURL('image/png');
+
+            var doc = new jsPDF('p', 'mm', 'a4');
+            var width = doc.internal.pageSize.getWidth();
+            var height = doc.internal.pageSize.getHeight();
+
+            doc.addImage(imgData, 'PNG', 0, 0, width, height);
+            doc.save('reporte.pdf');
+        }
+
         var ctx = document.getElementById('myChart').getContext('2d');
         var myChart = new Chart(ctx, {
-            type: 'bar',
+            type: 'pie', // Cambiado a tipo de gráfico de pastel
             data: {
                 labels: ['Mayores de 18 años', 'Menores de 18 años'],
                 datasets: [{
                     label: 'Cantidad de Registros',
-                    data: [{{ mayor_count }}, {{ menor_count }}],
+                    data: [5, 8], // Estos datos son solo de ejemplo, debes reemplazarlos con los datos reales
                     backgroundColor: [
                         'rgba(255, 99, 132, 0.2)',
                         'rgba(54, 162, 235, 0.2)',

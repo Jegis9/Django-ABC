@@ -6,6 +6,7 @@
     <title>Formulario</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.css">
  
     <style>
         body {
@@ -14,7 +15,7 @@
             background-attachment: fixed;
             background-size: cover;
         }
-
+    
         form {
             background-color: #FFFFFF;
             padding: 20px;
@@ -22,18 +23,18 @@
             width: fit-content;
             margin: 20px auto; /* Centrar el formulario y agregar espacio entre el formulario y la tabla */
         }
-
+    
         input[type="text"],
         input[type="email"],
         input[type="date"] {
             padding: 10px;
             margin-bottom: 10px;
-            border: none;
+            border: 2px solid #406ff3; /* Borde azul */
             border-radius: 5px;
             background-color: rgba(255, 255, 255, 0.1); /* Color de fondo semi-transparente */
             color: #072b8d;
         }
-
+    
         input[type="submit"] {
             padding: 10px;
             border: none;
@@ -50,6 +51,7 @@
             text-align: center;
         }
     </style>
+    
 </head>
 <body>
     <div class="container">
@@ -102,25 +104,28 @@
                         {% for task in task %}
                         <tbody>
                             <tr>
-                                <td>{{ task.carnet }}</td>
-                                <td>{{ task.nombres }}</td>
-                                <td>{{ task.apellidos }}</td>
-                                <td>{{ task.correoelectronico }}</td>
-                                <td>{{ task.fechaNacimiento }}</td>
+                                <td> <input type="text" value="{{ task.carnet }}" class="form-control"> </td>
+                                <td> <input type="text" value="{{ task.nombres }}" class="form-control"></td>
+                                <td><input type="text" value="{{ task.apellidos }}" class="form-control"></td>
+                                <td><input type="text" value="{{ task.correoelectronico }}" class="form-control"></td>
+                                <td><input type="text" value="{{ task.fechaNacimiento }}" class="form-control"></td>
                                 <td>
-                                    <form action="{% url 'delete_task' task.id %}" method="POST" class="a">
+                                    <form id="delete-form-{{ task.id }}" action="{% url 'delete_task' task.id %}" method="POST" class="a">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                                        <!-- Agregamos un evento onclick que llama a una función para confirmar la eliminación -->
+                                        <button type="button" class="btn btn-danger" onclick="confirmarEliminacion('{{ task.id }}')">Eliminar</button>
+                                    </form>
+
+                                    <form id="editar-form-{{ task.id }}" action="{% url 'editarTask' task.id %}" method="POST">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-warning">Editar</button>
                                     </form>
                                 </td>
                                 <td>
-                                    <form  method="POST" class="a">
-                                        {% csrf_token %}
-                                        <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                                            Editar
-                                        </button>
-                                    </form>
+
+
+                                    
+                                    
                                 </td>
                             </tr>
                         </tbody>
@@ -132,71 +137,81 @@
         </div>
     </div>
 
-
-
-
-
-
-  
-  <!-- Modal -->
-  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<!-- Modal -->
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Editar Alumno</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editar-form" action="/task/editar_task/" method="post">
+
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="modal-carnet">Carnet:</label>
+                        <!-- Cambiamos el input a un campo oculto para el carné -->
+                        <input type="hidden" name="carnet" id="modal-carnet">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-nombres">Nombres:</label>
+                        <input type="text" class="form-control" id="modal-nombres" name="nombres" maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-apellidos">Apellidos:</label>
+                        <input type="text" class="form-control" id="modal-apellidos" name="apellidos" maxlength="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-correoelectronico">Correo Electrónico:</label>
+                        <input type="email" class="form-control" id="modal-correoelectronico" name="correoelectronico">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-fechaNacimiento">Fecha de Nacimiento:</label>
+                        <input type="date" class="form-control" id="modal-fechaNacimiento" name="fechaNacimiento">
+                    </div>
+
+                    <button type="submit" id="guardar-cambios-btn" class="btn btn-primary">Guardar Cambios</button>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
         </div>
-        <div class="modal-body">
-            <form action="/task/new/" method="post">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="carnet">Carnet:</label>
-                    <input type="text" class="form-control" id="carnet" name="carnet" maxlength="50">
-                </div>
-
-                <div class="form-group">
-                    <label for="nombres">Nombres:</label>
-                    <input type="text" class="form-control" id="nombres" name="nombres" maxlength="100">
-                </div>
-
-                <div class="form-group">
-                    <label for="apellidos">Apellidos:</label>
-                    <input type="text" class="form-control" id="apellidos" name="apellidos" maxlength="100">
-                </div>
-
-                <div class="form-group">
-                    <label for="correoelectronico">Correo Electrónico:</label>
-                    <input type="email" class="form-control" id="correoelectronico" name="correoelectronico">
-                </div>
-
-                <div class="form-group">
-                    <label for="fechaNacimiento">Fecha de Nacimiento:</label>
-                    <input type="date" class="form-control" id="fechaNacimiento" name="fechaNacimiento">
-                </div>
-
-                <button type="submit" class="btn btn-primary">Enviar</button>
-            </form>
-
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        
-        </div>
-      </div>
     </div>
-  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"></script>
+
+<script>
+// Función para confirmar la eliminación con SweetAlert
+function confirmarEliminacion(taskId) {
+    swal({
+        title: "¿Estás seguro?",
+        text: "Una vez eliminado, no podrás recuperar este registro",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+    })
+    .then((confirmacion) => {
+        if (confirmacion) {
+            // Si el usuario confirma, se envía el formulario para eliminar
+            document.getElementById('delete-form-' + taskId).submit();
+        } else {
+            // Si el usuario cancela, no se hace nada
+            swal("La operación ha sido cancelada");
+        }
+    });
+}
 
 
-
-
-
- 
-
-
-
-
-
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</script>
 </body>
 </html>
+
