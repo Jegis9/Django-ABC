@@ -2,10 +2,9 @@ from django.shortcuts import render, redirect
 from datetime import datetime
 from .models import Task
 from django.http import JsonResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from .models import Task
-from django.views.decorators.http import require_POST
-
+from django.http import HttpResponseNotAllowed
 
 # Create your views here.
 def list_task(request):
@@ -27,35 +26,40 @@ def create_task(request):
     return redirect('/task/')
  
 
-def editarTask(request, task_id):
-    # Obtener la tarea por su ID
-    task = get_object_or_404(Task, id=task_id)
-    
-    # Actualizar los datos de la tarea con los datos recibidos del formulario
-    carnet = request.POST.get('carnet')
-    nombres = request.POST.get('nombres')
-    apellidos = request.POST.get('apellidos')
-    correoelectronico = request.POST.get('correo')
-    fechaNacimiento = request.POST.get('fecha')
-    
-    # Verificar si los campos no son null antes de asignarlos a la instancia de Task
-    if carnet is not None:
-        task.carnet = carnet
-    if nombres is not None:
-        task.nombres = nombres
-    if apellidos is not None:
-        task.apellidos = apellidos
-    if correoelectronico is not None:
-        task.correoelectronico = correoelectronico
-    if fechaNacimiento is not None:
-        task.fechaNacimiento = fechaNacimiento
-    
-    # Guardar los cambios en la base de datos
-    task.save()
-    
-    # Redirigir a alguna página de confirmación o a la misma página de edición
-    return redirect('editarTask', task_id=task_id)
+""" def editarTask(request, task_id):
 
+    if request.method == 'POST':
+
+        if require_POST.get('carnet') and require_POST.get('nombres') and require_POST.get('apellidos') and require_POST.get('correo') and require_POST.get('fecha'):
+        task = Task()
+        task.carnet = request.POST.get('carnet')
+        task.nombres = request.POST.get('nombres')
+        task.apellidos = request.POST.get('apellidos')
+        task.correoelectronico = request.POST.get('correo')
+        task.fechaNacimiento = request.POST.get('fecha')
+        
+
+        task.save()
+        return redirect('/task/')
+
+"""
+
+def edit_task(request, task_id):
+    task = Task.objects.get(id=task_id)
+
+    if request.method == 'POST':
+        task.carnet = request.POST.get('carnet')
+        task.nombres = request.POST.get('nombres')
+        task.apellidos = request.POST.get('apellidos')
+        task.correoelectronico = request.POST.get('correoelectronico')
+        task.fechaNacimiento = request.POST.get('fechaNacimiento')
+        task.save()
+        return redirect('/task/') 
+
+    context = {
+        'task': task,
+    }
+    return render(request, 'edit_task.html', context)
 
 
 
@@ -67,22 +71,49 @@ def delete_task(request, task_id):
 
 
 
+import json
+from django.shortcuts import render
+from datetime import datetime
+from django.shortcuts import render
 
-# Create your views here.
-def cont(request):
+def report(request):
+    personas = Task.objects.all()
 
+    # Lista para almacenar las edades
+    edades = []
 
-    tasks = Task.objects.all()
-    count = tasks.count()  # Contar la cantidad total de registros
+    # Calcular las edades y agregarlas a la lista
+    for persona in personas:
+        edad = datetime.now().year - persona.fechaNacimiento.year
+        edades.append(edad)
 
-    # Contar registros mayores y menores de 18 años
-    mayor_count = 0
-    menor_count = 0
-    for task in tasks:
-        if (datetime.now().year - task.fechaNacimiento.year) >= 18:
-            mayor_count += 1
+    # Procesar las edades para obtener los grupos de edades
+    grupos_edades = {
+        '0-9': 0,
+        '10-19': 0,
+        '20-29': 0,
+        '30-39': 0,
+        '40-49': 0,
+        '50-59': 0
+    }
+
+    for edad in edades:
+        if edad >= 0 and edad <= 9:
+            grupos_edades['0-9'] += 1
+        elif edad >= 10 and edad <= 19:
+            grupos_edades['10-19'] += 1
+        elif edad >= 20 and edad <= 29:
+            grupos_edades['20-29'] += 1
+        elif edad >= 30 and edad <= 39:
+            grupos_edades['30-39'] += 1
+        elif edad >= 40 and edad <= 49:
+            grupos_edades['40-49'] += 1
+        elif edad >= 50 and edad <= 59:
+            grupos_edades['50-59'] += 1
         else:
-            menor_count += 1
+            grupos_edades['90+'] += 1
 
-    return render(request, 'report.html', { 'count': count, 'mayor_count': mayor_count, 'menor_count': menor_count})
+    # Convertir el diccionario a JSON
+    rangos_edades_json = json.dumps(grupos_edades)
 
+    return render(request, 'report.html', {'rangos_edades': rangos_edades_json})
